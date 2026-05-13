@@ -1,0 +1,1481 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* 参考首页效果图：亮白底 #f9fafb；彩色集中在右侧，紫为主、右上极小暖高光 */
+:root {
+    --qa-canvas: #f9fafb;
+    --qa-canvas-deep: #f3f4f6;
+    --qa-canvas-veil: rgba(249, 250, 251, 0.96);
+}
+
+/* Base Styles — light canvas (full site uses mesh-bg-aurora) */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--qa-canvas);
+    color: #1e293b;
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #e2e8f0;
+}
+::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+html {
+    background-color: var(--qa-canvas);
+    overflow-x: clip;
+}
+
+/* Legacy class */
+.mesh-bg {
+    background-color: var(--qa-canvas);
+}
+
+/* Legacy / utility: 与画布同色（首页 tech strip 等） */
+.bg-qa-canvas {
+    background-color: var(--qa-canvas) !important;
+}
+
+/* ─── Site-wide：与参考图一致 — 右侧氤氲 mesh；紫占绝大部分，暖黄仅锁在右上角一小角 ─── */
+body.mesh-bg-aurora {
+    background-color: var(--qa-canvas);
+}
+
+.aurora-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    contain: paint;
+    /*
+     * 叠层顺序（前列 = 叠在上层）：① 右上极小蜜桃高光 ②③ 右侧大块薰衣草 ④ 中部极淡衔接（左侧保持白）
+     * 底色：干净中性白，不用斜向「左下紫」以免整屏发灰。
+     */
+    background:
+        radial-gradient(ellipse 34% 28% at 97% 10%, rgba(255, 248, 240, 0.38) 0%, rgba(255, 236, 218, 0.14) 44%, transparent 72%),
+        radial-gradient(ellipse 74% 115% at 88% 46%, rgba(232, 224, 248, 0.5) 0%, rgba(220, 208, 242, 0.26) 38%, rgba(226, 218, 246, 0.12) 54%, transparent 76%),
+        radial-gradient(ellipse 56% 92% at 99% 50%, rgba(238, 230, 252, 0.36) 0%, rgba(242, 236, 252, 0.1) 46%, transparent 74%),
+        radial-gradient(ellipse 85% 75% at 58% 50%, rgba(252, 250, 254, 0.16) 0%, transparent 62%),
+        linear-gradient(to bottom, #fafafa 0%, var(--qa-canvas) 50%, #fafafa 100%);
+}
+
+.aurora-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(128px);
+    opacity: 0.32;
+    mix-blend-mode: normal;
+    will-change: transform, opacity;
+}
+
+/* 右侧空气：极淡冷白，柔化紫团边缘 */
+.aurora-blob--cyan {
+    width: min(72vw, 620px);
+    height: min(72vw, 620px);
+    right: 8%;
+    top: 28%;
+    background: radial-gradient(circle at 50% 50%, rgba(248, 250, 252, 0.35) 0%, rgba(240, 244, 250, 0.1) 52%, transparent 78%);
+    animation: aurora-float-1 26s ease-in-out infinite;
+}
+
+/* 右侧主薰衣草雾团（面积大、与 backdrop 同侧） */
+.aurora-blob--violet {
+    width: min(105vw, 920px);
+    height: min(95vw, 780px);
+    right: -20%;
+    top: 5%;
+    background: radial-gradient(circle at 52% 48%, rgba(218, 206, 238, 0.42) 0%, rgba(206, 192, 228, 0.22) 42%, rgba(196, 182, 218, 0.08) 68%, transparent 88%);
+    animation: aurora-float-2 32s ease-in-out infinite;
+    animation-delay: -7s;
+}
+
+/* 右上角小暖高光（类名 mint）：体积小，仅占一角 */
+.aurora-blob--mint {
+    width: min(42vw, 380px);
+    height: min(38vw, 340px);
+    right: -4%;
+    top: -6%;
+    background: radial-gradient(circle at 62% 38%, rgba(255, 242, 228, 0.42) 0%, rgba(255, 232, 212, 0.16) 48%, rgba(252, 218, 195, 0.05) 76%, transparent 92%);
+    animation: aurora-float-3 28s ease-in-out infinite;
+    animation-delay: -13s;
+}
+
+/* 横向柔带：加强右侧紫雾连贯，不带大块黄 */
+.aurora-band {
+    position: absolute;
+    left: -8%;
+    width: 118%;
+    height: min(68vh, 560px);
+    top: 16%;
+    filter: blur(100px);
+    opacity: 0.12;
+    border-radius: 50%;
+    background: linear-gradient(
+        108deg,
+        transparent 0%,
+        rgba(228, 218, 244, 0.18) 38%,
+        rgba(216, 204, 236, 0.14) 58%,
+        transparent 82%
+    );
+    mix-blend-mode: normal;
+    animation: aurora-mesh-flow 44s ease-in-out infinite;
+}
+
+@keyframes aurora-float-1 {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.32;
+    }
+    40% {
+        transform: translate(12vw, 6vh) scale(1.08);
+        opacity: 0.38;
+    }
+    70% {
+        transform: translate(-6vw, 10vh) scale(0.96);
+        opacity: 0.28;
+    }
+}
+
+@keyframes aurora-float-2 {
+    0%, 100% {
+        transform: translate(0, 0) scale(1.02);
+        opacity: 0.3;
+    }
+    35% {
+        transform: translate(-14vw, 12vh) scale(1.12);
+        opacity: 0.36;
+    }
+    65% {
+        transform: translate(8vw, -5vh) scale(0.94);
+        opacity: 0.26;
+    }
+}
+
+@keyframes aurora-float-3 {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0.26;
+    }
+    45% {
+        transform: translate(10vw, -12vh) rotate(6deg);
+        opacity: 0.34;
+    }
+    75% {
+        transform: translate(-12vw, 4vh) rotate(-4deg);
+        opacity: 0.22;
+    }
+}
+
+@keyframes aurora-mesh-flow {
+    0%, 100% {
+        transform: translate(-6vw, 0) scaleX(1) rotate(-2deg);
+        opacity: 0.14;
+    }
+    33% {
+        transform: translate(8vw, -5vh) scaleX(1.12) rotate(1.5deg);
+        opacity: 0.22;
+    }
+    66% {
+        transform: translate(3vw, 3vh) scaleX(0.96) rotate(-1deg);
+        opacity: 0.17;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aurora-blob,
+    .aurora-band {
+        animation: none !important;
+        opacity: 0.26;
+        transform: none;
+    }
+}
+
+/* Push page content above aurora layer (nav stays position:fixed from utilities) */
+body.mesh-bg-aurora > section {
+    position: relative;
+    z-index: 1;
+}
+
+body.mesh-bg-aurora > footer {
+    position: relative;
+    z-index: 12;
+    isolation: isolate;
+    margin-top: -3px;
+}
+
+body.mesh-bg-aurora > button#back-to-top {
+    position: relative;
+    z-index: 60;
+}
+
+body.mesh-bg-aurora > nav {
+    z-index: 50;
+}
+
+/* ========== Light airy UI (pastel mesh + readable slate text) ========== */
+body.mesh-bg-aurora .text-white {
+    color: #0f172a !important;
+}
+body.mesh-bg-aurora .hover\:text-white:hover {
+    color: #0f172a !important;
+}
+body.mesh-bg-aurora .text-slate-300 {
+    color: #475569 !important;
+}
+body.mesh-bg-aurora .text-slate-400 {
+    color: #64748b !important;
+}
+body.mesh-bg-aurora .text-slate-500 {
+    color: #64748b !important;
+}
+body.mesh-bg-aurora .text-slate-600 {
+    color: #475569 !important;
+}
+
+/* 首页 Hero 主标题：仅比全局 text-white→slate-900 再略深一丝（不改渐变字） */
+body.mesh-bg-aurora #about h1.text-white {
+    color: #0c1324 !important;
+}
+
+body.mesh-bg-aurora .border-white\/5,
+body.mesh-bg-aurora .border-white\/10 {
+    border-color: rgba(15, 23, 42, 0.08) !important;
+}
+body.mesh-bg-aurora .border-b.border-white\/5 {
+    border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+}
+body.mesh-bg-aurora .border-t.border-white\/5 {
+    border-top-color: rgba(15, 23, 42, 0.08) !important;
+}
+body.mesh-bg-aurora .bg-slate-900\/50 {
+    background-color: var(--qa-canvas) !important;
+}
+body.mesh-bg-aurora .bg-slate-900\/30 {
+    background-color: var(--qa-canvas) !important;
+}
+body.mesh-bg-aurora .bg-slate-950 {
+    background-color: var(--qa-canvas) !important;
+}
+
+/* 首页 Technical path strip：原为 bg-slate-950/90，未命中上一规则，会呈现深色条 */
+body.mesh-bg-aurora .bg-slate-950\/90 {
+    background-color: var(--qa-canvas) !important;
+}
+body.mesh-bg-aurora .bg-white\/5 {
+    background-color: rgba(15, 23, 42, 0.045) !important;
+}
+body.mesh-bg-aurora .hover\:bg-white\/5:hover {
+    background-color: rgba(15, 23, 42, 0.06) !important;
+}
+body.mesh-bg-aurora .hover\:bg-white\/10:hover {
+    background-color: rgba(15, 23, 42, 0.08) !important;
+}
+body.mesh-bg-aurora .border-white\/10 {
+    border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+body.mesh-bg-aurora .glass {
+    background: rgba(255, 255, 255, 0.82);
+    border-color: rgba(15, 23, 42, 0.06);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset;
+}
+body.mesh-bg-aurora .glass-card {
+    background: rgba(255, 255, 255, 0.74);
+    border-color: rgba(15, 23, 42, 0.07);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.85) inset;
+}
+body.mesh-bg-aurora .glass-card:hover {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(14, 165, 233, 0.38);
+    box-shadow: 0 28px 56px -16px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(14, 165, 233, 0.12);
+}
+
+body.mesh-bg-aurora .text-gradient {
+    background: linear-gradient(to right, #0284c7, #7c3aed, #ea580c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.mesh-bg-aurora nav a.nav-active {
+    color: #0f172a !important;
+}
+body.mesh-bg-aurora #mobile-menu a.nav-active {
+    color: #0f172a !important;
+    background: rgba(14, 165, 233, 0.12);
+    border-left-color: #0284c7;
+}
+
+body.mesh-bg-aurora .carousel-dot.active {
+    background-color: rgba(15, 23, 42, 0.55) !important;
+}
+
+body.mesh-bg-aurora .pub-item.glass-card:hover {
+    background-color: rgba(255, 255, 255, 0.88) !important;
+}
+
+/* Publications：筛选选中态与左侧年份/会议徽章统一用 sky-600（比 sky-700 略亮一档） */
+body.mesh-bg-aurora #all-publications .pub-filter.active {
+    color: #0284c7 !important;
+    background-color: rgba(2, 132, 199, 0.12) !important;
+    border-color: rgba(2, 132, 199, 0.34) !important;
+}
+body.mesh-bg-aurora #all-publications .pub-filter.active:hover {
+    background-color: rgba(2, 132, 199, 0.18) !important;
+}
+
+/* 每行最左侧高亮胶囊（年份 / Oral / 会议标签）与筛选条同色 */
+body.mesh-bg-aurora #all-publications .pub-item > div.flex > div.flex-shrink-0:first-child span {
+    color: #0284c7 !important;
+    background-color: rgba(2, 132, 199, 0.12) !important;
+    border-color: rgba(2, 132, 199, 0.28) !important;
+}
+
+body.mesh-bg-aurora #all-publications .pub-item h4 a:hover {
+    color: #0284c7 !important;
+}
+
+body.mesh-bg-aurora #back-to-top {
+    color: #0f172a !important;
+    border-color: rgba(14, 165, 233, 0.35);
+}
+
+body.mesh-bg-aurora footer .text-slate-400,
+body.mesh-bg-aurora footer .text-slate-500,
+body.mesh-bg-aurora footer span,
+body.mesh-bg-aurora footer a {
+    color: #0284c7 !important;
+}
+body.mesh-bg-aurora footer a:hover,
+body.mesh-bg-aurora footer a.hover\:text-white:hover {
+    color: #0369a1 !important;
+}
+
+body.mesh-bg-aurora footer {
+    background-color: var(--qa-canvas) !important;
+    background-image: none !important;
+    border-top-color: transparent !important;
+}
+
+/*
+ * 页脚 HTML 含 border-t border-white/5；下方全局规则
+ * body.mesh-bg-aurora .border-t.border-white\/5 { border-top-color: rgba(...) !important }
+ * 特异性高于上一段 footer { border-top-color: transparent }，顶边仍会落成灰线 → 接缝。
+ * 必须用「footer + 同类」锁掉顶边框。
+ */
+body.mesh-bg-aurora footer.border-t,
+body.mesh-bg-aurora footer.border-t.border-white\/5 {
+    border-top: none !important;
+}
+
+/* Tailwind 晚加载时 .bg-slate-950 可能盖过上面规则，再锁一层 */
+body.mesh-bg-aurora footer.bg-slate-950 {
+    background-color: var(--qa-canvas) !important;
+}
+
+/*
+ * Media / Publications 曾用 bg-slate-900/50 + 本段「最后一屏铺 var(--qa-canvas)」叠在固定极光层上，
+ * 等于「底图（多层 radial/linear 极光）」和「一块纯色蒙版」硬拼，极易在页脚附近出现一条色差带。
+ * Commercialization 主区域无半透明 slate，极光连续，视觉上无缝。
+ * 故：主内容 section 不再强制铺底；需要纯色带的区块用显式类（如首页 .tech-path-strip）。
+ */
+
+/* 首页底部技术栈横条：与页面同色 + 与 AI Agent Research（sky-600）一致 */
+body.mesh-bg-aurora .tech-path-strip {
+    background-color: var(--qa-canvas) !important;
+    border-top-color: transparent !important;
+}
+body.mesh-bg-aurora .tech-path-strip .flex {
+    color: #0284c7 !important;
+    font-weight: 600;
+}
+body.mesh-bg-aurora .tech-path-strip span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #0284c7 !important;
+}
+@media (min-width: 640px) {
+    body.mesh-bg-aurora .tech-path-strip span {
+        font-size: 0.8125rem;
+    }
+}
+@media (min-width: 768px) {
+    body.mesh-bg-aurora .tech-path-strip span {
+        font-size: 0.875rem;
+    }
+}
+
+body.mesh-bg-aurora .tech-path-strip span.text-slate-700 {
+    color: rgba(2, 132, 199, 0.35) !important;
+}
+
+/* Showcase & spotlight panels */
+body.mesh-bg-aurora .showcase-tabs {
+    border-color: rgba(15, 23, 42, 0.1);
+    background: rgba(255, 255, 255, 0.88);
+}
+body.mesh-bg-aurora .showcase-tab {
+    color: #64748b;
+}
+body.mesh-bg-aurora .showcase-tab:hover,
+body.mesh-bg-aurora .showcase-tab.active {
+    color: #0f172a;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+body.mesh-bg-aurora .showcase-card img {
+    border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+body.mesh-bg-aurora .showcase-card h3 {
+    color: #0f172a;
+}
+body.mesh-bg-aurora .showcase-card h3 a:hover {
+    color: #0284c7;
+}
+body.mesh-bg-aurora .showcase-card p {
+    color: #64748b;
+}
+body.mesh-bg-aurora .showcase-link {
+    color: #0f172a;
+}
+body.mesh-bg-aurora .showcase-link:hover {
+    color: #0284c7;
+}
+body.mesh-bg-aurora .showcase-card img.showcase-img-contain {
+    background:
+        radial-gradient(circle at 30% 20%, rgba(14, 165, 233, 0.12), transparent 36%),
+        linear-gradient(135deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.96));
+}
+
+body.mesh-bg-aurora .technical-showcase {
+    border-color: rgba(15, 23, 42, 0.1);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(248, 250, 252, 0.82)),
+        radial-gradient(circle at 18% 0%, rgba(14, 165, 233, 0.08), transparent 36%);
+}
+
+body.mesh-bg-aurora nav a.nav-current {
+    color: #0f172a !important;
+    background: rgba(14, 165, 233, 0.14) !important;
+    border-color: rgba(14, 165, 233, 0.28) !important;
+}
+
+body.mesh-bg-aurora #mobile-menu a.nav-current {
+    background: rgba(14, 165, 233, 0.16) !important;
+    border-color: rgba(14, 165, 233, 0.32) !important;
+}
+
+/* Media / commercial module text */
+body.mesh-bg-aurora .media-source {
+    color: #0284c7 !important;
+}
+body.mesh-bg-aurora .media-title {
+    color: #0c1324;
+}
+body.mesh-bg-aurora .media-copy {
+    color: #64748b;
+}
+body.mesh-bg-aurora .media-link {
+    color: #0284c7;
+}
+body.mesh-bg-aurora .media-link:hover {
+    color: #0369a1;
+}
+body.mesh-bg-aurora .media-img,
+body.mesh-bg-aurora .commercial-img {
+    border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+body.mesh-bg-aurora .metric-tile {
+    border-color: rgba(15, 23, 42, 0.1);
+    background: rgba(255, 255, 255, 0.78);
+}
+body.mesh-bg-aurora .metric-tile span {
+    color: #0f172a;
+}
+body.mesh-bg-aurora .section-link {
+    background: rgba(15, 23, 42, 0.05);
+    color: #0f172a;
+}
+body.mesh-bg-aurora .section-link:hover {
+    background: rgba(14, 165, 233, 0.12);
+    color: #0284c7;
+}
+
+body.mesh-bg-aurora .page-nav {
+    border-color: rgba(15, 23, 42, 0.12);
+    background: rgba(255, 255, 255, 0.88);
+    color: #0f172a;
+}
+body.mesh-bg-aurora .page-nav-label {
+    background: rgba(255, 255, 255, 0.95);
+    color: #334155;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+/* Research cards — frosted tints */
+body.mesh-bg-aurora .research-tint-blue {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.88) 100%);
+    border-color: rgba(14, 165, 233, 0.22) !important;
+}
+body.mesh-bg-aurora .research-tint-violet {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 243, 255, 0.9) 100%);
+    border-color: rgba(139, 92, 246, 0.2) !important;
+}
+body.mesh-bg-aurora .research-tint-gold {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 251, 235, 0.88) 100%);
+    border-color: rgba(245, 158, 11, 0.2) !important;
+}
+body.mesh-bg-aurora .research-tint-green {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(236, 253, 245, 0.88) 100%);
+    border-color: rgba(16, 185, 129, 0.2) !important;
+}
+body.mesh-bg-aurora .research-tint-orange {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 247, 237, 0.88) 100%);
+    border-color: rgba(249, 115, 22, 0.2) !important;
+}
+body.mesh-bg-aurora .research-tint-rose {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 241, 242, 0.88) 100%);
+    border-color: rgba(244, 63, 94, 0.18) !important;
+}
+body.mesh-bg-aurora .research-tint-teal {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(240, 253, 250, 0.88) 100%);
+    border-color: rgba(20, 184, 166, 0.2) !important;
+}
+
+body.mesh-bg-aurora .commercial-card.glass-card:hover,
+body.mesh-bg-aurora .media-card.glass-card:hover {
+    box-shadow: 0 28px 64px -18px rgba(15, 23, 42, 0.14);
+}
+
+nav a.nav-active {
+    color: #ffffff;
+}
+
+/* Mobile nav active */
+#mobile-menu a.nav-active {
+    color: #ffffff;
+    background: rgba(56, 189, 248, 0.1);
+    border-left: 3px solid #38bdf8;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-card {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.08s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.08s ease, border-color 0.08s ease, background 0.08s ease;
+    transform-origin: center center;
+}
+
+.glass-card:hover {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(56, 189, 248, 0.42);
+    transform: translateY(-14px) scale(1.045);
+    box-shadow: 0 24px 56px -14px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(56, 189, 248, 0.12);
+}
+
+/* Text Gradients */
+.text-gradient {
+    background: linear-gradient(to right, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-gold {
+    background: linear-gradient(to right, #fbbf24, #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Terminal Styles */
+.terminal-font {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom Animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+/* Hero Torus — 参考图：圆球右缘/下缘被 hero 裁掉，只露偏左上一侧的大半弧，不是完整圆盘落在框内 */
+.hero-torus-wrapper {
+    position: absolute;
+    right: -140px;
+    bottom: -230px;
+    width: 580px;
+    height: 580px;
+    overflow: visible;
+    isolation: isolate;
+}
+
+.hero-torus-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 220%;
+    height: 220%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 50%;
+    /*
+     * 与早期版本一致：不用 mask 挖空，仅靠大半径径向 + blur 向外交融（线框球本身不会被「糊成实心」）；
+     * 右上暖黄：双层叠加（大块晕 + 屏沿高光），浓度适度提高。
+     */
+    filter: blur(32px);
+    opacity: 0.9;
+    background:
+        radial-gradient(ellipse 52% 48% at 76% 14%, rgba(255, 238, 210, 0.62) 0%, rgba(255, 224, 178, 0.34) 30%, rgba(255, 232, 200, 0.16) 48%, transparent 78%),
+        radial-gradient(ellipse 32% 28% at 96% 5%, rgba(255, 250, 235, 0.55) 0%, rgba(255, 236, 210, 0.28) 40%, transparent 68%),
+        radial-gradient(ellipse 102% 100% at 50% 54%, rgba(222, 210, 244, 0.2) 0%, rgba(210, 196, 232, 0.12) 44%, rgba(226, 216, 246, 0.06) 62%, rgba(248, 244, 252, 0.03) 78%, transparent 94%),
+        radial-gradient(ellipse 138% 132% at 46% 54%, rgba(240, 234, 252, 0.12) 0%, rgba(252, 250, 254, 0.05) 52%, transparent 78%);
+}
+
+.hero-torus-wrapper canvas {
+    position: relative;
+    z-index: 1;
+}
+
+@media (min-width: 1024px) {
+    .hero-torus-wrapper {
+        width: 680px;
+        height: 680px;
+        right: -190px;
+        bottom: -270px;
+    }
+}
+@media (min-width: 1280px) {
+    .hero-torus-wrapper {
+        width: 760px;
+        height: 760px;
+        right: -240px;
+        bottom: -300px;
+    }
+}
+@media (min-width: 1536px) {
+    .hero-torus-wrapper {
+        width: 840px;
+        height: 840px;
+        right: -280px;
+        bottom: -330px;
+    }
+}
+
+
+/* Glow Effects */
+.glow-on-hover:hover {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+}
+
+/* Badges for Oral/Spotlight */
+.badge-oral {
+    background: rgba(251, 191, 36, 0.15); /* amber-400 */
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+    animation: pulse-gold 3s infinite;
+}
+
+.badge-spotlight {
+    background: rgba(232, 121, 249, 0.15); /* fuchsia-400 */
+    color: #e879f9;
+    border: 1px solid rgba(232, 121, 249, 0.3);
+    box-shadow: 0 0 10px rgba(232, 121, 249, 0.2);
+    animation: pulse-pink 3s infinite;
+}
+
+@keyframes pulse-gold {
+    0%, 100% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+}
+
+@keyframes pulse-pink {
+    0%, 100% { box-shadow: 0 0 10px rgba(232, 121, 249, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(232, 121, 249, 0.5); }
+}
+
+/* Hide scrollbar for carousel */
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Carousel active dot */
+.carousel-dot.active {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    transform: scale(1.2);
+}
+
+.carousel-dot {
+    transition: all 0.3s ease;
+}
+
+/* Homepage spotlight */
+.showcase-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.72);
+}
+
+.showcase-tab {
+    border-radius: 999px;
+    padding: 9px 14px;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 800;
+    transition: all 0.2s ease;
+}
+
+.showcase-tab:hover,
+.showcase-tab.active {
+    color: #020617;
+    background: #ffffff;
+}
+
+.showcase-shell {
+    position: relative;
+}
+
+.showcase-tabs--floating {
+    position: absolute;
+    top: -76px;
+    right: 0;
+    z-index: 10;
+}
+
+@media (max-width: 1023px) {
+    .showcase-tabs--floating {
+        position: static;
+        margin-bottom: 16px;
+    }
+}
+
+.showcase-panel {
+    display: none;
+}
+
+.showcase-panel.active {
+    display: block;
+}
+
+.showcase-track {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 2px;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+    padding: 2px 2px 18px;
+}
+
+/* 首页 Selected Work：三列网格（非横向滚动） */
+.showcase-track.showcase-track--grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    overflow-x: visible;
+    scroll-snap-type: none;
+    cursor: default;
+    padding: 2px 2px 18px;
+}
+
+@media (min-width: 768px) {
+    .showcase-track.showcase-track--grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.showcase-track.showcase-track--grid .showcase-card {
+    width: 100%;
+    max-width: none;
+    flex: none;
+    scroll-snap-align: unset;
+}
+
+.showcase-track.is-dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+    user-select: none;
+}
+
+.showcase-card {
+    width: min(82vw, 410px);
+    flex: 0 0 auto;
+    overflow: hidden;
+    scroll-snap-align: start;
+}
+
+.showcase-card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    object-position: top center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.25s ease;
+}
+
+.showcase-card img.showcase-img-contain {
+    object-fit: contain;
+    padding: 34px;
+    background:
+        radial-gradient(circle at 30% 20%, rgba(56, 189, 248, 0.16), transparent 34%),
+        linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.96));
+}
+
+.showcase-card:hover img {
+    transform: scale(1.025);
+}
+
+.showcase-body {
+    padding: 18px;
+}
+
+.showcase-kicker {
+    color: #38bdf8;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.showcase-card h3 {
+    color: #ffffff;
+    font-size: 1.08rem;
+    font-weight: 850;
+    line-height: 1.35;
+    margin-bottom: 10px;
+}
+
+.showcase-card h3 a:hover {
+    color: #38bdf8;
+}
+
+.showcase-card p {
+    color: #94a3b8;
+    font-size: 0.86rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.showcase-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.showcase-link:hover {
+    color: #38bdf8;
+}
+
+/* 首页 #selected-work：深色卡片 + Tabs，覆盖 body.mesh-bg-aurora 下的浅色 showcase 规则 */
+body.mesh-bg-aurora #selected-work .showcase-tabs {
+    background: rgba(15, 23, 42, 0.72) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-tab {
+    color: #94a3b8 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-tab:hover,
+body.mesh-bg-aurora #selected-work .showcase-tab.active {
+    color: #020617 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-kicker {
+    color: #0284c7 !important;
+    margin-bottom: 6px !important;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-card h3,
+body.mesh-bg-aurora #selected-work .showcase-card h3 a {
+    color: #0f172a !important;
+    margin-bottom: 6px !important;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-card h3 a:hover {
+    color: #0284c7 !important;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-card p {
+    color: #475569 !important;
+    margin-bottom: 10px !important;
+    line-height: 1.5 !important;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-link {
+    color: #0284c7 !important;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-link:hover {
+    color: #0369a1 !important;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-card img {
+    border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Selected Work 三列网格：与示意图一致，卡间距约 20–24px */
+body.mesh-bg-aurora #selected-work .showcase-track.showcase-track--grid {
+    gap: 1.5rem; /* 24px */
+    align-items: start;
+}
+
+body.mesh-bg-aurora #selected-work .showcase-body {
+    padding: 0.75rem 0.875rem 0.875rem !important; /* 收紧卡片内留白，不改文案 */
+}
+/* Current navigation state */
+nav a.nav-current {
+    color: #ffffff !important;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.24);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 8px 24px rgba(56, 189, 248, 0.08);
+}
+
+nav .hidden.md\:flex a.nav-current {
+    padding: 8px 12px;
+    border-radius: 999px;
+}
+
+#mobile-menu a.nav-current {
+    background: rgba(56, 189, 248, 0.16);
+    border-color: rgba(56, 189, 248, 0.28);
+}
+
+/* Technical homepage spotlight */
+.technical-showcase {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(2, 6, 23, 0.62)),
+        radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.11), transparent 34%);
+    padding: clamp(14px, 2vw, 24px);
+}
+
+.technical-showcase .showcase-track {
+    gap: 14px;
+}
+
+@media (min-width: 1024px) {
+    .technical-showcase .showcase-track {
+        display: grid;
+        grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        overflow: visible;
+        cursor: default;
+        padding: 0;
+        scroll-snap-type: none;
+    }
+
+    .technical-showcase .showcase-card {
+        width: auto;
+        min-width: 0;
+        display: grid;
+        grid-template-columns: 132px minmax(0, 1fr);
+        align-items: stretch;
+        border-radius: 14px;
+    }
+
+    .technical-showcase .showcase-card:first-child {
+        grid-row: 1 / span 2;
+        grid-template-columns: 1fr;
+    }
+
+    .technical-showcase .showcase-card:first-child img {
+        aspect-ratio: 16 / 9;
+    }
+
+    .technical-showcase .showcase-card:not(:first-child) img {
+        height: 100%;
+        min-height: 170px;
+        aspect-ratio: auto;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 0;
+    }
+
+    .technical-showcase .showcase-card:not(:first-child) .showcase-body {
+        padding: 16px;
+    }
+
+    .technical-showcase .showcase-card:not(:first-child) h3 {
+        font-size: 0.98rem;
+        line-height: 1.35;
+    }
+
+    .technical-showcase .showcase-card:not(:first-child) p {
+        font-size: 0.8rem;
+        line-height: 1.55;
+        margin-bottom: 12px;
+    }
+
+    .technical-showcase .showcase-card:not(:first-child) .showcase-kicker {
+        font-size: 0.66rem;
+        margin-bottom: 8px;
+    }
+}
+
+/* Whole-site module navigation */
+.page-nav {
+    position: fixed;
+    top: 50vh;
+    z-index: 70;
+    width: 46px;
+    height: 78px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.72);
+    color: #ffffff;
+    backdrop-filter: blur(14px);
+    transition: all 0.2s ease;
+}
+
+.page-nav:hover {
+    background: rgba(56, 189, 248, 0.22);
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+.page-nav-left {
+    left: clamp(10px, 1.2vw, 24px);
+}
+
+.page-nav-right {
+    right: clamp(10px, 1.2vw, 24px);
+}
+
+.page-nav-label {
+    position: absolute;
+    top: 50%;
+    max-width: 150px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #cbd5e1;
+    font-size: 0.72rem;
+    font-weight: 800;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.page-nav-left .page-nav-label {
+    left: calc(100% + 10px);
+}
+
+.page-nav-right .page-nav-label {
+    right: calc(100% + 10px);
+}
+
+.page-nav:hover .page-nav-label {
+    opacity: 1;
+}
+
+.page-transition-out-left {
+    animation: pageOutLeft 0.18s ease forwards;
+}
+
+.page-transition-out-right {
+    animation: pageOutRight 0.18s ease forwards;
+}
+
+@keyframes pageOutLeft {
+    to {
+        opacity: 0;
+        transform: translateX(18px);
+    }
+}
+
+@keyframes pageOutRight {
+    to {
+        opacity: 0;
+        transform: translateX(-18px);
+    }
+}
+
+/* Publication item animation */
+.pub-item {
+    transition: all 0.3s ease;
+}
+
+.pub-item:hover {
+    transform: translateX(4px);
+}
+
+/* Commercialization and Media sections */
+.commercial-card,
+.media-card {
+    min-height: 100%;
+}
+
+.commercial-card.glass-card,
+.media-card.glass-card {
+    transition: transform 0.08s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.08s ease, border-color 0.08s ease;
+    transform-origin: center center;
+}
+
+.commercial-card.glass-card:hover,
+.media-card.glass-card:hover {
+    transform: translateY(-16px) scale(1.048);
+    box-shadow: 0 28px 64px -18px rgba(0, 0, 0, 0.68), 0 0 0 1px rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.48);
+}
+
+.commercial-img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    object-position: top center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.metric-tile {
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.55);
+    border-radius: 10px;
+    padding: 12px 10px;
+    transition: transform 0.08s cubic-bezier(0.33, 1, 0.68, 1), border-color 0.08s ease, box-shadow 0.08s ease;
+    transform-origin: center center;
+}
+
+.metric-tile:hover {
+    transform: translateY(-8px) scale(1.065);
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 16px 36px -14px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(56, 189, 248, 0.1);
+}
+
+.metric-tile span {
+    display: block;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.metric-tile small {
+    display: block;
+    color: #64748b;
+    font-size: 0.68rem;
+    line-height: 1.2;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.section-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.section-link:hover {
+    background: rgba(56, 189, 248, 0.14);
+    color: #38bdf8;
+}
+
+.media-img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    object-position: top center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.media-source {
+    color: #38bdf8;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.media-title {
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.35;
+    margin-bottom: 10px;
+}
+
+.media-copy {
+    color: #94a3b8;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    margin-bottom: 16px;
+}
+
+.media-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: color 0.2s ease;
+}
+
+.media-link:hover {
+    color: #38bdf8;
+}
+
+@media (max-width: 640px) {
+    .page-nav {
+        display: none;
+    }
+
+    .commercial-img {
+        height: 210px;
+    }
+
+    .metric-tile {
+        padding: 10px 8px;
+    }
+}
+
+/* Deck section kicker label */
+.kicker {
+    color: #0284c7;
+    font-size: 0.72rem; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* Venue badges */
+.venue {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-size: .72rem; font-weight: 700; letter-spacing: 0.04em;
+    color: #64748b;
+}
+.venue.spotlight { color: #c026d3; }
+.venue.oral { color: #d97706; }
+
+/* Card link style */
+a.card-link { color: #0f172a; font-weight: 700; border-bottom: 1px solid rgba(2,132,199,0.25); text-decoration: none; }
+a.card-link:hover { color: #0284c7; border-bottom-color: #0284c7; }
+
+/* Video card — dark background for video contrast */
+.video-card {
+    position: relative; overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid rgba(15,23,42,0.08);
+    cursor: pointer; background: #000;
+    box-shadow: 0 12px 32px -16px rgba(15,23,42,0.18);
+}
+.video-card video {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    transition: transform .25s ease;
+}
+.video-card:hover video { transform: scale(1.02); }
+.video-card .play-pill {
+    position: absolute; left: 14px; bottom: 14px; z-index: 2;
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .45rem .8rem; border-radius: 8px;
+    background: rgba(2,6,23,0.7); color: #ffffff;
+    font-size: .78rem; font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.video-card:hover .play-pill { background: rgba(2,132,199,0.95); color: #ffffff; border-color: transparent; }
+
+/* Video modal — full-screen dark overlay */
+#vmodal {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(15,23,42,0.78); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+    padding: 24px;
+}
+#vmodal.open { display: flex; }
+#vmodal .frame {
+    width: min(1200px, 100%); max-height: 88vh;
+    aspect-ratio: 16/9;
+    background: #000; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.45);
+    position: relative;
+}
+#vmodal video { width: 100%; height: 100%; object-fit: contain; background: #000; display: block; }
+#vmodal .close {
+    position: absolute; top: 12px; right: 12px; z-index: 3;
+    width: 40px; height: 40px; border-radius: 999px;
+    background: rgba(255,255,255,0.92); color: #0f172a;
+    border: 1px solid rgba(15,23,42,0.1);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+}
+#vmodal .close:hover { background: #0284c7; color: #ffffff; }
+
+/* Back to Top Button */
+#back-to-top {
+    transition: all 0.3s ease;
+}
+
+#back-to-top:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+}
+
+/* --- Homepage research layout (left-aligned flow, tinted cards) --- */
+.research-section-label {
+    letter-spacing: -0.02em;
+}
+
+.research-card.glass-card:hover {
+    transform: translateY(-6px) scale(1.015);
+}
+
+.research-tint-blue {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.55) 0%, rgba(15, 23, 42, 0.35) 100%);
+    border-color: rgba(56, 189, 248, 0.18) !important;
+    box-shadow: inset 0 1px 0 rgba(56, 189, 248, 0.06);
+}
+
+.research-tint-blue:hover {
+    border-color: rgba(56, 189, 248, 0.35) !important;
+    box-shadow: 0 12px 40px -12px rgba(56, 189, 248, 0.15);
+}
+
+.research-tint-violet {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.55) 0%, rgba(15, 23, 42, 0.35) 100%);
+    border-color: rgba(129, 140, 248, 0.2) !important;
+    box-shadow: inset 0 1px 0 rgba(129, 140, 248, 0.06);
+}
+
+.research-tint-violet:hover {
+    border-color: rgba(129, 140, 248, 0.38) !important;
+    box-shadow: 0 12px 40px -12px rgba(129, 140, 248, 0.18);
+}
+
+.research-tint-gold {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.32) 100%);
+    border-color: rgba(251, 191, 36, 0.16) !important;
+    box-shadow: inset 0 1px 0 rgba(251, 191, 36, 0.05);
+}
+
+.research-tint-gold:hover {
+    border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+.research-tint-green {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.32) 100%);
+    border-color: rgba(74, 222, 128, 0.14) !important;
+    box-shadow: inset 0 1px 0 rgba(74, 222, 128, 0.05);
+}
+
+.research-tint-green:hover {
+    border-color: rgba(74, 222, 128, 0.3) !important;
+}
+
+.research-tint-orange {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.32) 100%);
+    border-color: rgba(251, 146, 60, 0.16) !important;
+    box-shadow: inset 0 1px 0 rgba(251, 146, 60, 0.05);
+}
+
+.research-tint-orange:hover {
+    border-color: rgba(251, 146, 60, 0.32) !important;
+}
+
+.research-tint-rose {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.48) 0%, rgba(15, 23, 42, 0.3) 100%);
+    border-color: rgba(251, 113, 133, 0.14) !important;
+    box-shadow: inset 0 1px 0 rgba(251, 113, 133, 0.05);
+}
+
+.research-tint-rose:hover {
+    border-color: rgba(251, 113, 133, 0.28) !important;
+}
+
+.research-tint-teal {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.48) 0%, rgba(15, 23, 42, 0.3) 100%);
+    border-color: rgba(45, 212, 191, 0.14) !important;
+    box-shadow: inset 0 1px 0 rgba(45, 212, 191, 0.05);
+}
+
+.research-tint-teal:hover {
+    border-color: rgba(45, 212, 191, 0.28) !important;
+}
+
+.tech-path-strip span:not([aria-hidden]) {
+    letter-spacing: inherit;
+}
+
+.carousel-nav-inline button:focus-visible {
+    outline: 2px solid rgba(56, 189, 248, 0.6);
+    outline-offset: 2px;
+}
+
+.carousel-nav-inline {
+    position: relative;
+    z-index: 30;
+}
+
+.carousel-nav-inline .carousel-nav-btn:active {
+    transform: scale(0.94);
+}
+
+/* Featured Publications: pointer maps to horizontal scroll */
+.carousel-hover-pan {
+    cursor: ew-resize;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .carousel-hover-pan {
+        cursor: auto;
+    }
+}
+
